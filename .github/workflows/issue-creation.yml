@@ -12,14 +12,23 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const axios = require('axios');
             const webhookUrl = process.env.SLACK_WEBHOOK_URL;
             const issue = context.payload.issue;
 
             const message = {
-              text: `A new issue has been created:\n\n*Title:* ${issue.title}\n*Description:* ${issue.body}\n*Created by:* ${issue.user.login}\n*URL:* ${issue.html_url}`,
+              text: `A new issue has been created:\n\n*Title:* ${issue.title}\n*Description:* ${issue.body || "No description"}\n*Created by:* ${issue.user.login}\n*URL:* ${issue.html_url}`
             };
 
-            return axios.post(webhookUrl, message);
+            const response = await fetch(webhookUrl, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(message)
+            });
+
+            if (!response.ok) {
+              throw new Error(`Slack notification failed: ${response.statusText}`);
+            }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
