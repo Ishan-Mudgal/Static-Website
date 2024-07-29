@@ -1,0 +1,25 @@
+name: Notify Slack on Issue Creation
+
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification to Slack
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const axios = require('axios');
+            const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+            const issue = context.payload.issue;
+
+            const message = {
+              text: `A new issue has been created:\n\n*Title:* ${issue.title}\n*Description:* ${issue.body}\n*Created by:* ${issue.user.login}\n*URL:* ${issue.html_url}`,
+            };
+
+            return axios.post(webhookUrl, message);
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
