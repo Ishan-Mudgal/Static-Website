@@ -19,16 +19,672 @@
     </header>
 
     <main>
-      <h1>Python Code Example</h1>
+      <h3>FIFO Scheduling</h3>
 
       <pre><code>
-def greet(name):
-    """This function greets the person passed in as a parameter."""
-    print(f"Hello, {name}!")
+def calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes):
+    waitingTimes[0] = 0
+    for processIndex in range(1, numProcesses):
+        waitingTimes[processIndex] = burstTimes[processIndex - 1] + waitingTimes[processIndex - 1] 
 
-# Call the function
-greet('Alice')
+def calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes):
+    for processIndex in range(numProcesses):
+        turnAroundTimes[processIndex] = burstTimes[processIndex] + waitingTimes[processIndex]
+
+def calculateAverageTimes(processIDs, numProcesses, burstTimes):
+    waitingTimes = [0] * numProcesses
+    turnAroundTimes = [0] * numProcesses 
+    totalWaitingTime = 0
+    totalTurnAroundTime = 0
+
+    calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes)
+    calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes)
+
+    print("Process ID | Burst Time | Waiting Time | Turn Around Time")
+
+    for processIndex in range(numProcesses):
+        totalWaitingTime += waitingTimes[processIndex]
+        totalTurnAroundTime += turnAroundTimes[processIndex]
+        print(f" {processIndex + 1}\t\t {burstTimes[processIndex]}\t\t {waitingTimes[processIndex]}\t\t {turnAroundTimes[processIndex]}") 
+
+    print(f"Average waiting time = {totalWaitingTime / numProcesses}")
+    print(f"Average turn around time = {totalTurnAroundTime / numProcesses}")
+
+processIDs = [1, 2, 3]
+numProcesses = len(processIDs)
+burstTimes = [10, 5, 8]
+
+calculateAverageTimes(processIDs, numProcesses, burstTimes)
+        
     </code></pre>
+
+      <h3>Round Robin Scheduling</h3>
+
+      <pre><code>
+def calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes, quantum):
+remainingBurstTimes = burstTimes[:]
+time = 0
+queue = []
+for i in range(numProcesses):
+    queue.append(i)  # Initialize the process queue
+
+while queue:
+    processIndex = queue.pop(0)
+    if remainingBurstTimes[processIndex] > quantum:
+        remainingBurstTimes[processIndex] -= quantum
+        time += quantum
+        queue.append(processIndex)
+    else:
+        time += remainingBurstTimes[processIndex]
+        waitingTimes[processIndex] = time - burstTimes[processIndex]  # Calculate waiting time
+        remainingBurstTimes[processIndex] = 0
+
+def calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes):
+for processIndex in range(numProcesses):
+    turnAroundTimes[processIndex] = burstTimes[processIndex] + waitingTimes[processIndex]
+
+def calculateAverageTimes(processIDs, numProcesses, burstTimes, quantum):
+waitingTimes = [0] * numProcesses
+turnAroundTimes = [0] * numProcesses
+totalWaitingTime = 0
+totalTurnAroundTime = 0
+
+calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes, quantum)
+calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes)
+
+print("Process ID | Burst Time | Waiting Time | Turn Around Time")
+
+for processIndex in range(numProcesses):
+    totalWaitingTime += waitingTimes[processIndex]
+    totalTurnAroundTime += turnAroundTimes[processIndex]
+    print(f" {processIDs[processIndex]}\t\t {burstTimes[processIndex]}\t\t {waitingTimes[processIndex]}\t\t {turnAroundTimes[processIndex]}") 
+
+print(f"Average waiting time = {totalWaitingTime / numProcesses}")
+print(f"Average turn around time = {totalTurnAroundTime / numProcesses}")
+
+# Example usage
+processIDs = [1, 2, 3]
+numProcesses = len(processIDs)
+burstTimes = [10, 5, 8]
+quantum = 4  # Set quantum for Round Robin
+
+calculateAverageTimes(processIDs, numProcesses, burstTimes, quantum)
+    
+    </code></pre>
+
+      <h3>Shortest Job First (SJF) Scheduling</h3>
+
+      <pre><code>
+def calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes):
+remainingBurstTimes = burstTimes[:]
+completionTimes = [0] * numProcesses
+remainingProcesses = list(range(numProcesses))
+time = 0
+
+while remainingProcesses:
+    # Find the process with the shortest burst time
+    shortestJobIndex = -1
+    shortestBurstTime = float('inf')
+
+    for i in remainingProcesses:
+        if remainingBurstTimes[i] < shortestBurstTime:
+            shortestBurstTime = remainingBurstTimes[i]
+            shortestJobIndex = i
+
+    # Execute the process with the shortest burst time
+    time += remainingBurstTimes[shortestJobIndex]
+    completionTimes[shortestJobIndex] = time
+    remainingProcesses.remove(shortestJobIndex)
+
+# Calculate waiting times
+for i in range(numProcesses):
+    waitingTimes[i] = completionTimes[i] - burstTimes[i]
+
+def calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes):
+for processIndex in range(numProcesses):
+    turnAroundTimes[processIndex] = burstTimes[processIndex] + waitingTimes[processIndex]
+
+def calculateAverageTimes(processIDs, numProcesses, burstTimes):
+waitingTimes = [0] * numProcesses
+turnAroundTimes = [0] * numProcesses
+totalWaitingTime = 0
+totalTurnAroundTime = 0
+
+calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes)
+calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes)
+
+print("Process ID | Burst Time | Waiting Time | Turn Around Time")
+
+for processIndex in range(numProcesses):
+    totalWaitingTime += waitingTimes[processIndex]
+    totalTurnAroundTime += turnAroundTimes[processIndex]
+    print(f" {processIDs[processIndex]}\t\t {burstTimes[processIndex]}\t\t {waitingTimes[processIndex]}\t\t {turnAroundTimes[processIndex]}") 
+
+print(f"Average waiting time = {totalWaitingTime / numProcesses}")
+print(f"Average turn around time = {totalTurnAroundTime / numProcesses}")
+
+# Example usage
+processIDs = [1, 2, 3]
+numProcesses = len(processIDs)
+burstTimes = [10, 5, 8]
+
+calculateAverageTimes(processIDs, numProcesses, burstTimes)
+      </code></pre>
+
+      <h3># Shortest Remaining Time First (SRTF) Scheduling</h3>
+
+      <pre><code>
+        def calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes):
+        remainingBurstTimes = burstTimes[:]
+        time = 0
+        remainingProcesses = list(range(numProcesses))
+        completionTimes = [0] * numProcesses
+        isCompleted = [False] * numProcesses  # To track if a process is completed
+        remainingProcessesCount = numProcesses
+        lastExecutedTime = [0] * numProcesses  # Track last execution time
+    
+        while remainingProcessesCount > 0:
+            # Find the process with the shortest remaining burst time that hasn't been completed
+            shortestJobIndex = -1
+            shortestRemainingTime = float('inf')
+    
+            for i in remainingProcesses:
+                if not isCompleted[i] and remainingBurstTimes[i] < shortestRemainingTime:
+                    shortestRemainingTime = remainingBurstTimes[i]
+                    shortestJobIndex = i
+    
+            # Execute the process
+            remainingBurstTimes[shortestJobIndex] -= 1
+            time += 1
+    
+            # If the process is completed, mark it
+            if remainingBurstTimes[shortestJobIndex] == 0:
+                isCompleted[shortestJobIndex] = True
+                remainingProcessesCount -= 1
+                completionTimes[shortestJobIndex] = time
+    
+            lastExecutedTime[shortestJobIndex] = time
+    
+        # Calculate waiting times
+        for i in range(numProcesses):
+            waitingTimes[i] = completionTimes[i] - burstTimes[i]
+    
+    def calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes):
+        for processIndex in range(numProcesses):
+            turnAroundTimes[processIndex] = burstTimes[processIndex] + waitingTimes[processIndex]
+    
+    def calculateAverageTimes(processIDs, numProcesses, burstTimes):
+        waitingTimes = [0] * numProcesses
+        turnAroundTimes = [0] * numProcesses
+        totalWaitingTime = 0
+        totalTurnAroundTime = 0
+    
+        calculateWaitingTime(processIDs, numProcesses, burstTimes, waitingTimes)
+        calculateTurnAroundTime(processIDs, numProcesses, burstTimes, waitingTimes, turnAroundTimes)
+    
+        print("Process ID | Burst Time | Waiting Time | Turn Around Time")
+    
+        for processIndex in range(numProcesses):
+            totalWaitingTime += waitingTimes[processIndex]
+            totalTurnAroundTime += turnAroundTimes[processIndex]
+            print(f" {processIDs[processIndex]}\t\t {burstTimes[processIndex]}\t\t {waitingTimes[processIndex]}\t\t {turnAroundTimes[processIndex]}") 
+    
+        print(f"Average waiting time = {totalWaitingTime / numProcesses}")
+        print(f"Average turn around time = {totalTurnAroundTime / numProcesses}")
+    
+    # Example usage
+    processIDs = [1, 2, 3]
+    numProcesses = len(processIDs)
+    burstTimes = [10, 5, 8]
+    
+    calculateAverageTimes(processIDs, numProcesses, burstTimes)
+    
+
+        </code></pre>
+
+      <h3>FCFS</h3>
+
+      <pre><code>
+            def fcfs_disk_scheduling(requests, initial_position):
+            # The initial head position
+            current_position = initial_position
+            total_head_movement = 0
+            seek_sequence = []
+        
+            # Process the requests in the order they appear (First-Come, First-Served)
+            for request in requests:
+                seek_distance = abs(request - current_position)
+                total_head_movement += seek_distance
+                current_position = request
+                seek_sequence.append(request)
+        
+            # Output the results
+            print("Seek Sequence: ", seek_sequence)
+            print("Total Head Movement: ", total_head_movement)
+        
+        # Example usage:
+        if __name__ == "__main__":
+            # Requests for disk access
+            requests = [98, 183, 41, 122, 14, 124, 65, 67]
+            # Initial position of the disk head
+            initial_position = 53
+        
+            fcfs_disk_scheduling(requests, initial_position)        
+          </code></pre>
+
+      <h3>LRU</h3>
+
+      <pre><code>
+from collections import deque
+
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity  # Maximum number of pages the cache can hold
+        self.cache = {}  # Holds the pages in the cache
+        self.order = deque()  # Keeps track of the order of page access
+
+    def reference_page(self, page: int):
+        """Simulate referencing a page."""
+        if page in self.cache:
+            # If page is already in cache, we move it to the end (most recently used)
+            self.order.remove(page)
+            self.order.append(page)
+        else:
+            # If the page is not in the cache
+            if len(self.cache) >= self.capacity:
+                # Cache is full, remove least recently used (LRU) page
+                lru_page = self.order.popleft()  # Remove the first item (LRU)
+                del self.cache[lru_page]  # Remove the LRU page from cache
+            # Add the new page to the cache and mark it as most recently used
+            self.cache[page] = True
+            self.order.append(page)
+
+    def display_cache(self):
+        """Display the current cache."""
+        print("Current Cache: ", list(self.cache.keys()))
+
+
+# Example Usage
+if __name__ == "__main__":
+    # Create an LRU cache with a capacity of 3
+    lru_cache = LRUCache(3)
+
+    # Simulate referencing some pages
+    lru_cache.reference_page(1)
+    lru_cache.reference_page(2)
+    lru_cache.reference_page(3)
+    lru_cache.display_cache()  # Should print: [1, 2, 3]
+
+    # Reference page 2 again (it should become the most recently used)
+    lru_cache.reference_page(2)
+    lru_cache.display_cache()  # Should print: [1, 3, 2]
+
+    # Adding a new page should evict the least recently used (page 1)
+    lru_cache.reference_page(4)
+    lru_cache.display_cache()  # Should print: [3, 2, 4]
+
+              </code></pre>
+
+      <h3>Optimal</h3>
+
+      <pre><code>
+def optimal_page_replacement(reference_string, capacity):
+    cache = []
+    page_faults = 0
+
+    # Iterate through each page in the reference string
+    for i in range(len(reference_string)):
+        page = reference_string[i]
+        
+        # If the page is not in the cache, we need to handle a page fault
+        if page not in cache:
+            if len(cache) < capacity:
+                # If there is space in the cache, simply add the page
+                cache.append(page)
+            else:
+                # If the cache is full, replace the optimal page
+                # Find the page to replace: the page that is used farthest in the future
+                farthest_index = -1
+                page_to_replace = None
+                for p in cache:
+                    try:
+                        # Find the index of the next reference of page p in the future
+                        next_use = reference_string[i + 1:].index(p)
+                    except ValueError:
+                        # If the page is not referenced again, consider it as the one to replace
+                        next_use = float('inf')
+
+                    # We want to replace the page that will be used farthest in the future
+                    if next_use > farthest_index:
+                        farthest_index = next_use
+                        page_to_replace = p
+
+                # Replace the page that is used farthest in the future
+                cache.remove(page_to_replace)
+                cache.append(page)
+            
+            # Increment page fault counter
+            page_faults += 1
+        
+        # Display the current state of the cache
+        print(f"Reference: {page}, Cache: {cache}")
+
+    return page_faults
+
+
+# Example usage:
+if __name__ == "__main__":
+    # Reference string (sequence of pages)
+    reference_string = [7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2, 3, 7, 0, 1]
+    # Cache capacity (number of frames)
+    capacity = 3
+    
+    page_faults = optimal_page_replacement(reference_string, capacity)
+    print(f"Total Page Faults: {page_faults}")
+
+      </code></pre>
+
+      <h3>Bankers</h3>
+
+      <pre><code>
+        class BankersAlgorithm:
+        def __init__(self, available, maximum, allocation):
+            self.available = available  # Available resources
+            self.maximum = maximum      # Maximum required resources for each process
+            self.allocation = allocation # Currently allocated resources for each process
+            self.num_processes = len(maximum)  # Number of processes
+            self.num_resources = len(available)  # Number of resource types
+    
+            # Calculate the Need matrix (Need = Maximum - Allocation)
+            self.need = [[self.maximum[i][j] - self.allocation[i][j] for j in range(self.num_resources)]
+                         for i in range(self.num_processes)]
+    
+        def is_safe(self):
+            work = self.available[:]
+            finish = [False] * self.num_processes
+            safe_sequence = []
+    
+            while len(safe_sequence) < self.num_processes:
+                progress_made = False
+    
+                for i in range(self.num_processes):
+                    if not finish[i] and all(self.need[i][j] <= work[j] for j in range(self.num_resources)):
+                        # If process i can finish
+                        for j in range(self.num_resources):
+                            work[j] += self.allocation[i][j]  # Add allocated resources back to work
+    
+                        finish[i] = True
+                        safe_sequence.append(i)
+                        progress_made = True
+                        break
+    
+                if not progress_made:
+                    # No process could make progress, thus the system is not in a safe state
+                    return False, []
+    
+            return True, safe_sequence
+    
+        def request_resources(self, process, request):
+            # Check if the request is less than or equal to the need and available resources
+            if any(request[j] > self.need[process][j] for j in range(self.num_resources)):
+                print("Error: Process has exceeded its maximum claim.")
+                return False
+    
+            if any(request[j] > self.available[j] for j in range(self.num_resources)):
+                print("Resources not available.")
+                return False
+    
+            # Temporarily allocate resources
+            temp_available = self.available[:]
+            temp_allocation = [row[:] for row in self.allocation]
+            temp_need = [row[:] for row in self.need]
+    
+            # Update available, allocation and need matrices
+            for j in range(self.num_resources):
+                self.available[j] -= request[j]
+                self.allocation[process][j] += request[j]
+                self.need[process][j] -= request[j]
+    
+            # Check if the system is still in a safe state
+            safe, safe_sequence = self.is_safe()
+    
+            if safe:
+                print("Request granted.")
+                return True
+            else:
+                print("Request denied. System would be in an unsafe state.")
+                # Rollback changes
+                self.available = temp_available
+                self.allocation = temp_allocation
+                self.need = temp_need
+                return False
+    
+    
+    # Example usage:
+    if __name__ == "__main__":
+        # Available resources
+        available = [3, 3, 2]
+    
+        # Maximum demand matrix (Maximum resources each process may need)
+        maximum = [
+            [7, 5, 3],
+            [3, 2, 2],
+            [9, 0, 2],
+            [2, 2, 2],
+            [4, 3, 3]
+        ]
+    
+        # Allocation matrix (Resources currently allocated to each process)
+        allocation = [
+            [0, 1, 0],
+            [2, 0, 0],
+            [3, 0, 2],
+            [2, 1, 1],
+            [0, 0, 2]
+        ]
+    
+        # Initialize the Banker's Algorithm
+        bankers = BankersAlgorithm(available, maximum, allocation)
+    
+        # Check if the system is in a safe state
+        safe, safe_sequence = bankers.is_safe()
+        if safe:
+            print("System is in a safe state.")
+            print("Safe sequence:", safe_sequence)
+        else:
+            print("System is in an unsafe state.")
+    
+        # Request resources for process 1 (example)
+        request = [1, 0, 2]  # Process 1 requests 1 unit of resource 1, 0 of resource 2, and 2 of resource 3
+        process = 1
+        bankers.request_resources(process, request)    
+    </code></pre>
+
+      <h3>Producer Consumer</h3>
+
+      <pre><code>
+        import java.util.concurrent.Semaphore;
+
+        class SharedBuffer {
+            private final int size;
+            private int count = 0;
+            private Semaphore empty;
+            private Semaphore full;
+            private Semaphore mutex;
+        
+            public SharedBuffer(int size) {
+                this.size = size;
+                this.empty = new Semaphore(size);
+                this.full = new Semaphore(0);
+                this.mutex = new Semaphore(1);
+            }
+        
+            public void produce() throws InterruptedException {
+                empty.acquire();
+                mutex.acquire();
+                count++;
+                System.out.println("Produced: Item " + count);
+                mutex.release();
+                full.release();
+            }
+        
+            public void consume() throws InterruptedException {
+                full.acquire();
+                mutex.acquire();
+                System.out.println("Consumed: Item " + count);
+                count--;
+                mutex.release();
+                empty.release();
+            }
+        }
+        
+        class Producer extends Thread {
+            private SharedBuffer buffer;
+        
+            public Producer(SharedBuffer buffer) {
+                this.buffer = buffer;
+            }
+        
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        buffer.produce();
+                        Thread.sleep(1000);
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        
+        class Consumer extends Thread {
+            private SharedBuffer buffer;
+        
+            public Consumer(SharedBuffer buffer) {
+                this.buffer = buffer;
+            }
+        
+            @Override
+            public void run() {
+                try {
+                    while (true) {
+                        buffer.consume();
+                        Thread.sleep(1500);
+                    }
+                } catch (InterruptedException e)            {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+        
+        public class SemaphoreProducerConsumer {
+            public static void main(String[] args) {
+                int bufferSize = 5;
+                SharedBuffer buffer = new SharedBuffer(bufferSize);
+        
+                Producer producer = new Producer(buffer);
+                Consumer consumer = new Consumer(buffer);
+        
+                producer.start();
+                consumer.start();
+            }
+        }
+        
+  </code></pre>
+
+      <h3>Reader Writer</h3>
+
+      <pre><code>
+    import java.util.concurrent.Semaphore;
+
+    class SharedResource {
+        private Semaphore mutex = new Semaphore(1);
+        private Semaphore writeLock = new Semaphore(1);
+        private int readCount = 0;
+    
+        public void read() throws InterruptedException {
+            mutex.acquire();
+            readCount++;
+            if (readCount == 1) {
+                writeLock.acquire();
+            }
+            mutex.release();
+    
+            System.out.println("Reading resource by " + Thread.currentThread().getName());
+    
+            mutex.acquire();
+            readCount--;
+            if (readCount == 0) {
+                writeLock.release();
+            }
+            mutex.release();
+        }
+    
+        public void write() throws InterruptedException {
+            writeLock.acquire();
+            System.out.println("Writing resource by " + Thread.currentThread().getName());
+            writeLock.release();
+        }
+    }
+    
+    class Reader extends Thread {
+        private SharedResource resource;
+    
+        public Reader(SharedResource resource) {
+            this.resource = resource;
+        }
+    
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    resource.read();
+                    Thread.sleep(1000);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+    
+    class Writer extends Thread {
+        private SharedResource resource;
+    
+        public Writer(SharedResource resource) {
+            this.resource = resource;
+        }
+    
+        @Override
+        public void run() {
+            try {
+                while (true) {
+                    resource.write();
+                    Thread.sleep(1500);
+                }
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+    
+    public class ReadersWritersProblem {
+        public static void main(String[] args) {
+            SharedResource resource = new SharedResource();
+    
+            Reader reader1 = new Reader(resource);
+            Reader reader2 = new Reader(resource);
+            Writer writer1 = new Writer(resource);
+            Writer writer2 = new Writer(resource);
+    
+            reader1.start();
+            reader2.start();
+            writer1.start();
+            writer2.start();
+        }
+    }
+    
+</code></pre>
     </main>
 
     <footer id="contact">
